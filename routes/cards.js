@@ -10,7 +10,7 @@ router.get('/users/:id', (req, res) => {
 
     const { name, age } = users[req.params.id];
 
-    res.send(`Пользователь ${name}, ${age} лет`);
+    res.send(`Пользователь ${ name}, ${ age} лет`);
 });
 
 module.exports = router; // экспортировали роутер
@@ -19,11 +19,11 @@ module.exports = router; // экспортировали роутер
 const router = require('express').Router();
 
 const {
-    getAllCards,
-    createCard,
-    deleteCard,
-    likeCard,
-    dislikeCard
+  getAllCards,
+  createCard,
+  deleteCard,
+  likeCard,
+  dislikeCard,
 } = require('../controllers/cards');
 
 router.get('/', getAllCards);
@@ -31,6 +31,5 @@ router.post('/', createCard);
 router.delete('/:cardId', deleteCard);
 router.put('/:cardId/likes', likeCard);
 router.delete('/:carId/likes', dislikeCard);
-
 
 module.exports = router;
