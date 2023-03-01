@@ -27,7 +27,7 @@ module.exports.createUser = (req, res) => {
   User.create({ name, about, avatar })
     .then((user) => res.send({ data: user }))
     .catch((err) => {
-      if (err === 'ValidationError' || err.name === 'CastError') {
+      if (err.name === 'ValidationError') {
         res.status(BAD_REQUEST_ERROR).send({ message: 'Incorrect data transmitted during user creation' });
       } else {
         res.status(INTERNAL_SERVER_ERROR).send({ message: 'Error has occurred on the server' });
@@ -48,7 +48,7 @@ module.exports.updateUserInfo = (req, res) => {
       res.send({ data: user });
     })
     .catch((err) => {
-      if (err === 'CastError') {
+      if (err.name === 'CastError') {
         res.status(BAD_REQUEST_ERROR).send({ message: 'Incorrect data transmitted when updating user information' });
       } else {
         res.status(INTERNAL_SERVER_ERROR).send({ message: 'Error has occurred on the server' });
@@ -69,7 +69,7 @@ module.exports.updateAvatar = (req, res) => {
       res.send({ data: user });
     })
     .catch((err) => {
-      if (err === 'ValidationError') {
+      if (err.name === 'ValidationError') {
         res.status(BAD_REQUEST_ERROR).send({ message: 'Incorrect data is transmitted when the avatar is updated' });
       } else {
         res.status(INTERNAL_SERVER_ERROR).send({ message: 'Error has occurred on the server' });
