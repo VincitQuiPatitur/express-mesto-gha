@@ -39,7 +39,7 @@ module.exports.updateUserInfo = (req, res) => {
   const { _id: userId } = req.user;
   const { name, about } = req.body;
 
-  User.findByIdAndUpdate(userId, { name, about }, { new: true })
+  User.findByIdAndUpdate(userId, { name, about }, { new: true, runValidation: true })
     .then((user) => {
       if (!user) {
         res.status(BAD_REQUEST_ERROR).send({ message: 'User with specified id not found' });
