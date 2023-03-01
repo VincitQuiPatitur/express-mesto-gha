@@ -15,7 +15,7 @@ module.exports.getUserById = (req, res) => {
   const { userId } = req.params;
   User.findById(userId)
     .orFail(() => {
-      res.status(NOT_FOUND_ERROR).send({ message: `User with id ${userId} not found` });
+      res.status(BAD_REQUEST_ERROR).send({ message: 'User with specified id not found' });
     })
     .then((user) => res.send({ data: user }))
     .catch(() => res.status(INTERNAL_SERVER_ERROR).send({ message: 'Error has occurred on the server' }));
@@ -42,7 +42,7 @@ module.exports.updateUserInfo = (req, res) => {
   User.findByIdAndUpdate(userId, { name, about }, { new: true })
     .then((user) => {
       if (!user) {
-        res.status(NOT_FOUND_ERROR).send({ message: `User with id ${userId} not found` });
+        res.status(BAD_REQUEST_ERROR).send({ message: 'User with specified id not found' });
         return;
       }
       res.send({ data: user });
@@ -60,10 +60,10 @@ module.exports.updateAvatar = (req, res) => {
   const { _id: userId } = req.user;
   const { avatar } = req.body;
 
-  User.findByIdAndUpdate(userId, avatar, { new: true })
+  User.findByIdAndUpdate(userId, avatar, { new: true, runValidators: true })
     .then((user) => {
       if (!user) {
-        res.status(NOT_FOUND_ERROR).send({ message: `User with id ${userId} not found` });
+        res.status(NOT_FOUND_ERROR).send({ message: 'User with specified id not found' });
         return;
       }
       res.send({ data: user });
