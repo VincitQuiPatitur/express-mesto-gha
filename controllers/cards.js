@@ -47,9 +47,9 @@ module.exports.deleteCard = (req, res) => {
     .catch((err) => {
       if (err.name === 'CastError') {
         res.status(BAD_REQUEST_ERROR).send({ message: 'Incorrect data transmitted during card deletion' });
-      } else {
-        res.status(INTERNAL_SERVER_ERROR).send({ message: 'Error has occurred on the server' });
+        return;
       }
+      res.status(INTERNAL_SERVER_ERROR).send({ message: 'Error has occurred on the server' });
     });
 };
 
@@ -68,9 +68,9 @@ module.exports.likeCard = (req, res) => {
     .catch((err) => {
       if (err.name === 'ValidationError') {
         res.status(BAD_REQUEST_ERROR).send({ message: 'Incorrect data transmitted in order to like the card' });
-      } else {
-        res.status(INTERNAL_SERVER_ERROR).send({ message: 'Error has occurred on the server' });
+        return;
       }
+      res.status(INTERNAL_SERVER_ERROR).send({ message: 'Error has occurred on the server' });
     });
 };
 
@@ -89,8 +89,8 @@ module.exports.dislikeCard = (req, res) => {
     .catch((err) => {
       if (err.name === 'ValidationError') {
         res.status(BAD_REQUEST_ERROR).send({ message: 'Incorrect data transmitted in order to dislike the card' });
-      } else {
-        res.status(INTERNAL_SERVER_ERROR).send({ message: 'Error has occurred on the server' });
+        return;
       }
+      res.status(INTERNAL_SERVER_ERROR).send({ message: 'Error has occurred on the server' });
     });
 };

@@ -29,9 +29,9 @@ module.exports.createUser = (req, res) => {
     .catch((err) => {
       if (err.name === 'ValidationError') {
         res.status(BAD_REQUEST_ERROR).send({ message: 'Incorrect data transmitted during user creation' });
-      } else {
-        res.status(INTERNAL_SERVER_ERROR).send({ message: 'Error has occurred on the server' });
+        return;
       }
+      res.status(INTERNAL_SERVER_ERROR).send({ message: 'Error has occurred on the server' });
     });
 };
 
@@ -50,9 +50,9 @@ module.exports.updateUserInfo = (req, res) => {
     .catch((err) => {
       if (err.name === 'CastError') {
         res.status(BAD_REQUEST_ERROR).send({ message: 'Incorrect data transmitted when updating user information' });
-      } else {
-        res.status(INTERNAL_SERVER_ERROR).send({ message: 'Error has occurred on the server' });
+        return;
       }
+      res.status(INTERNAL_SERVER_ERROR).send({ message: 'Error has occurred on the server' });
     });
 };
 
@@ -71,8 +71,8 @@ module.exports.updateAvatar = (req, res) => {
     .catch((err) => {
       if (err.name === 'ValidationError') {
         res.status(BAD_REQUEST_ERROR).send({ message: 'Incorrect data is transmitted when the avatar is updated' });
-      } else {
-        res.status(INTERNAL_SERVER_ERROR).send({ message: 'Error has occurred on the server' });
+        return;
       }
+      res.status(INTERNAL_SERVER_ERROR).send({ message: 'Error has occurred on the server' });
     });
 };
