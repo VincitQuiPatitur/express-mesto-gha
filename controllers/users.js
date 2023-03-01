@@ -27,7 +27,7 @@ module.exports.createUser = (req, res) => {
   User.create({ name, about, avatar })
     .then((user) => res.send({ data: user }))
     .catch((err) => {
-      if (err === 'ValidationError') {
+      if (err === 'ValidationError' || err.name === 'CastError') {
         res.status(BAD_REQUEST_ERROR).send({ message: 'Incorrect data transmitted during user creation' });
       } else {
         res.status(INTERNAL_SERVER_ERROR).send({ message: 'Error has occurred on the server' });
