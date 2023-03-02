@@ -25,7 +25,7 @@ module.exports.createCard = (req, res) => {
   Card.create({ name, link, owner })
     .then((card) => res.send({ data: card }))
     .catch((err) => {
-      if (err.name === 'ValidationError' || err.name === 'CastError') {
+      if (err.name === 'ValidationError') {
         res.status(BAD_REQUEST_ERROR).send({ message: 'Incorrect data transmitted during card creation' });
         return;
       }
@@ -45,7 +45,7 @@ module.exports.deleteCard = (req, res) => {
       res.send(card);
     })
     .catch((err) => {
-      if (err.name === 'ValidationError' || err.name === 'CastError') {
+      if (err.name === 'CastError') {
         res.status(BAD_REQUEST_ERROR).send({ message: 'Incorrect data transmitted during card deletion' });
         return;
       }
@@ -66,7 +66,7 @@ module.exports.likeCard = (req, res) => {
       res.send(card);
     })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
+      if (err.name === 'ValidationError' || err.name === 'CastError') {
         res.status(BAD_REQUEST_ERROR).send({ message: 'Incorrect data transmitted in order to like the card' });
         return;
       }
@@ -87,7 +87,7 @@ module.exports.dislikeCard = (req, res) => {
       res.send(card);
     })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
+      if (err.name === 'ValidationError' || err.name === 'CastError') {
         res.status(BAD_REQUEST_ERROR).send({ message: 'Incorrect data transmitted in order to dislike the card' });
         return;
       }
