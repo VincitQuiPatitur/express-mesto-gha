@@ -8,13 +8,7 @@ const {
 module.exports.getAllCards = (req, res) => {
   Card.find({})
     .populate('owner')
-    .then((cards) => {
-      if (!cards) {
-        res.status(NOT_FOUND_ERROR).send({ message: 'The cards do not exist' });
-        return;
-      }
-      res.send(cards);
-    })
+    .then((cards) => res.send(cards))
     .catch(() => res.status(INTERNAL_SERVER_ERROR).send({ message: 'Error has occurred on the server' }));
 };
 
