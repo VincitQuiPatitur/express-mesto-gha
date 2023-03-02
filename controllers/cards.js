@@ -81,13 +81,13 @@ module.exports.dislikeCard = (req, res) => {
   Card.findByIdAndUpdate(cardId, { $pull: { likes: userId } }, { new: true })
     .then((card) => {
       if (card) {
-        res.send(card);
+        res.status(NOT_FOUND_ERROR).send({ message: 'Card with specified id not found' });
         return;
       }
-      res.status(NOT_FOUND_ERROR).send({ message: 'Card with specified id not found' });
+      res.send(card);
     })
     .catch((err) => {
-      if (err.name === 'ValidationError' || err.name === 'CastError') {
+      if (err.name === 'CastError') {
         res.status(BAD_REQUEST_ERROR).send({ message: 'Incorrect data transmitted in order to dislike the card' });
         return;
       }
