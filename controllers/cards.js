@@ -25,7 +25,7 @@ module.exports.createCard = (req, res) => {
   Card.create({ name, link, owner })
     .then((card) => res.send({ data: card }))
     .catch((err) => {
-      if (err.name === 'ValidationError') {
+      if (err.name === 'ValidationError' || err.name === 'CastError') {
         res.status(BAD_REQUEST_ERROR).send({ message: 'Incorrect data transmitted during card creation' });
         return;
       }
@@ -39,13 +39,13 @@ module.exports.deleteCard = (req, res) => {
   Card.findByIdAndRemove(cardId)
     .then((card) => {
       if (!card) {
-        res.status(NOT_FOUND_ERROR).send({ message: `Card with id ${cardId} not found` });
+        res.status(NOT_FOUND_ERROR).send({ message: 'Card with specified id not found' });
         return;
       }
       res.send(card);
     })
     .catch((err) => {
-      if (err.name === 'CastError') {
+      if (err.name === 'ValidationError' || err.name === 'CastError') {
         res.status(BAD_REQUEST_ERROR).send({ message: 'Incorrect data transmitted during card deletion' });
         return;
       }
@@ -60,7 +60,7 @@ module.exports.likeCard = (req, res) => {
   Card.findByIdAndUpdate(cardId, { $addToSet: { likes: userId } }, { new: true })
     .then((card) => {
       if (!card) {
-        res.status(NOT_FOUND_ERROR).send({ message: `Card with id ${cardId} not found` });
+        res.status(NOT_FOUND_ERROR).send({ message: 'Card with specified id not found' });
         return;
       }
       res.send(card);
@@ -81,7 +81,7 @@ module.exports.dislikeCard = (req, res) => {
   Card.findByIdAndUpdate(cardId, { $pull: { likes: userId } }, { new: true })
     .then((card) => {
       if (!card) {
-        res.status(NOT_FOUND_ERROR).send({ message: `Card with id ${cardId} not found` });
+        res.status(NOT_FOUND_ERROR).send({ message: 'Card with specified id not found' });
         return;
       }
       res.send(card);

@@ -14,13 +14,14 @@ module.exports.getAllUsers = (req, res) => {
 module.exports.getUserById = (req, res) => {
   const { userId } = req.params;
   User.findById(userId)
-    .orFail(new Error('NotFound'))
-    .then((user) => res.send({ data: user }))
-    .catch((err) => {
-      if (err.name === 'NotFound') {
+    .then((user) => {
+      if (!user) {
         res.status(NOT_FOUND_ERROR).send({ message: 'Invalid user id' });
         return;
       }
+      res.send(user);
+    })
+    .catch((err) => {
       if (err.name === 'CastError') {
         res.status(BAD_REQUEST_ERROR).send({ message: 'User with specified id not found' });
         return;
@@ -33,7 +34,7 @@ module.exports.createUser = (req, res) => {
   const { name, about, avatar } = req.body;
 
   User.create({ name, about, avatar })
-    .then((user) => res.send({ data: user }))
+    .then((user) => res.send(user))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         res.status(BAD_REQUEST_ERROR).send({ message: 'Incorrect data transmitted during user creation' });
