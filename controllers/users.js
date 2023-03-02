@@ -15,10 +15,20 @@ module.exports.getUserById = (req, res) => {
   const { userId } = req.params;
   User.findById(userId)
     .orFail(() => {
-      res.status(BAD_REQUEST_ERROR).send({ message: 'User with specified id not found' });
+      new Error('NotFound');
     })
     .then((user) => res.send({ data: user }))
-    .catch(() => res.status(INTERNAL_SERVER_ERROR).send({ message: 'Error has occurred on the server' }));
+    .catch((err) => {
+      if (err.name === 'NotFound') {
+        res.status(BAD_REQUEST_ERROR).send({ message: 'User with specified id not found' });
+        return;
+      }
+      if (err.name === 'CastError') {
+        res.status(NOT_FOUND_ERROR).send({ message: 'Invalid user id' });
+        return;
+      }
+      res.status(INTERNAL_SERVER_ERROR).send({ message: 'Error has occurred on the server' });
+    });
 };
 
 module.exports.createUser = (req, res) => {
@@ -48,7 +58,7 @@ module.exports.updateUserInfo = (req, res) => {
       res.send({ data: user });
     })
     .catch((err) => {
-      if (err.name === 'CastError') {
+      if (err.name === 'CastError' || err.name === 'ValidationError') {
         res.status(BAD_REQUEST_ERROR).send({ message: 'Incorrect data transmitted when updating user information' });
         return;
       }
