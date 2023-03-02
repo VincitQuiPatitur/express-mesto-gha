@@ -80,11 +80,11 @@ module.exports.dislikeCard = (req, res) => {
 
   Card.findByIdAndUpdate(cardId, { $pull: { likes: userId } }, { new: true })
     .then((card) => {
-      if (!card) {
-        res.status(NOT_FOUND_ERROR).send({ message: 'Card with specified id not found' });
+      if (card) {
+        res.send(card);
         return;
       }
-      res.send(card);
+      res.status(NOT_FOUND_ERROR).send({ message: 'Card with specified id not found' });
     })
     .catch((err) => {
       if (err.name === 'ValidationError' || err.name === 'CastError') {
