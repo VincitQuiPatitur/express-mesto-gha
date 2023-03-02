@@ -1,21 +1,3 @@
-/*
-const router = require('express').Router();
-const { cards } = require('./controllers/cards');
-
-router.get('/users/:id', (req, res) => {
-    if (!users[req.params.id]) {
-        res.send(`Такого пользователя не существует`);
-        return;
-    }
-
-    const { name, age } = users[req.params.id];
-
-    res.send(`Пользователь ${ name}, ${ age} лет`);
-});
-
-module.exports = router; // экспортировали роутер
-*/
-
 const router = require('express').Router();
 
 const {
