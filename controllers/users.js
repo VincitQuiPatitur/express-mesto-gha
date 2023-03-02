@@ -14,17 +14,15 @@ module.exports.getAllUsers = (req, res) => {
 module.exports.getUserById = (req, res) => {
   const { userId } = req.params;
   User.findById(userId)
-    .orFail(() => {
-      new Error('NotFound');
-    })
+    .orFail(new Error('NotFound'))
     .then((user) => res.send({ data: user }))
     .catch((err) => {
       if (err.name === 'NotFound') {
-        res.status(BAD_REQUEST_ERROR).send({ message: 'User with specified id not found' });
+        res.status(NOT_FOUND_ERROR).send({ message: 'Invalid user id' });
         return;
       }
       if (err.name === 'CastError') {
-        res.status(NOT_FOUND_ERROR).send({ message: 'Invalid user id' });
+        res.status(BAD_REQUEST_ERROR).send({ message: 'User with specified id not found' });
         return;
       }
       res.status(INTERNAL_SERVER_ERROR).send({ message: 'Error has occurred on the server' });
@@ -70,7 +68,7 @@ module.exports.updateAvatar = (req, res) => {
   const { _id: userId } = req.user;
   const { avatar } = req.body;
 
-  User.findByIdAndUpdate(userId, avatar, { new: true, runValidators: true })
+  User.findByIdAndUpdate(userId, { avatar }, { new: true, runValidators: true })
     .then((user) => {
       if (!user) {
         res.status(NOT_FOUND_ERROR).send({ message: 'User with specified id not found' });
