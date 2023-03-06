@@ -1,4 +1,6 @@
+require('dotenv').config();
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 const User = require('../models/user');
 const {
@@ -100,5 +102,25 @@ module.exports.updateAvatar = (req, res) => {
         return;
       }
       res.status(INTERNAL_SERVER_ERROR).send({ message: 'Error has occurred on the server' });
+    });
+};
+
+module.exports.login = (req, res) => {
+  const { email, password } = req.body;
+  const { NODE_ENV, JWT_SECRET } = process.env;
+
+  return User.findUserByCredentials(email, password)
+    .then((user) => {
+      const token = jwt.sign(
+        { _id: user._id },
+        NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret',
+        { expiresIn: '7d' },
+      );
+      res.cookie('jwt', token, {
+        httpOnly: true,
+      }).end();
+    })
+    .catch((err) => {
+      res.status(401).send({ message: err.message }); // change
     });
 };
