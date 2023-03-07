@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
 
+const { login, createUser } = require('./controllers/users');
 const usersRouter = require('./routes/users');
 const cardsRouter = require('./routes/cards');
 
@@ -33,6 +34,10 @@ app.use((req, res, next) => {
   };
   next();
 });
+
+app.post('/signin', login);
+app.post('/signup', createUser);
+
 app.use('/users', usersRouter);
 app.use('/cards', cardsRouter);
 
