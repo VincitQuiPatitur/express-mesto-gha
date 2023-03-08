@@ -11,6 +11,7 @@ const usersRouter = require('./routes/users');
 const cardsRouter = require('./routes/cards');
 const NotFoundError = require('./errors/NotFoundError'); // 404
 const { NOT_FOUND_ERROR } = require('./errors/errors');
+const { validateLogin, validateUserCreation } = require('./middlewares/userValidation');
 
 // mongodb://127.0.0.1:27017/mestodb
 const { PORT = 3000, MONGO_URL = 'mongodb://localhost:27017/mestodb' } = process.env;
@@ -31,8 +32,8 @@ app.use(limiter);
 app.use(helmet());
 app.disable('x-powered-by');
 
-app.post('/signin', login);
-app.post('/signup', createUser);
+app.post('/signup', validateUserCreation, createUser);
+app.post('/signin', validateLogin, login);
 
 app.use('/users', auth, usersRouter);
 app.use('/cards', auth, cardsRouter);

@@ -1,8 +1,9 @@
 require('dotenv').config();
 const jwt = require('jsonwebtoken');
+const UnauthorizedError = require('../errors/UnauthorizedError');
 
-function handleAuthError(res) {
-  return res.status(401).send({ message: 'Необходима авторизация' });
+function handleAuthError(res, next) {
+  return next(new UnauthorizedError('Authorisation required'));
 }
 
 function extractBearerToken(header) {
