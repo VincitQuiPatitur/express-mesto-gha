@@ -3,38 +3,36 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 const User = require('../models/user');
-const {
-  BAD_REQUEST_ERROR, // 400
-  NOT_FOUND_ERROR, // 404
-  INTERNAL_SERVER_ERROR, // 500
-} = require('../errors/errors');
+const BadRequestError = require('../errors/BadRequestError'); // 400
+const UnauthorizedError = require('../errors/UnauthorizedError'); // 401
+const NotFoundError = require('../errors/NotFoundError'); // 404
 
-module.exports.getAllUsers = (req, res) => {
+module.exports.getAllUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.send(users))
-    .catch(() => res.status(INTERNAL_SERVER_ERROR).send({ message: 'Error has occurred on the server' }));
+    .catch((err) => next(err));
 };
 
-module.exports.getUserById = (req, res) => {
+module.exports.getUserById = (req, res, next) => {
   const { userId } = req.params;
   User.findById(userId)
     .then((user) => {
       if (!user) {
-        res.status(NOT_FOUND_ERROR).send({ message: 'Invalid user id' });
+        next(new NotFoundError('Invalid user id'));
         return;
       }
       res.send(user);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(BAD_REQUEST_ERROR).send({ message: 'User with specified id not found' });
+        next(new BadRequestError('User with specified id not found'));
         return;
       }
-      res.status(INTERNAL_SERVER_ERROR).send({ message: 'Error has occurred on the server' });
+      next(err);
     });
 };
 
-module.exports.createUser = (req, res) => {
+module.exports.createUser = (req, res, next) => {
   const {
     name,
     about,
@@ -56,56 +54,56 @@ module.exports.createUser = (req, res) => {
     .then((user) => res.send(user))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(BAD_REQUEST_ERROR).send({ message: 'Incorrect data transmitted during user creation' });
+        next(new BadRequestError('Incorrect data transmitted during user creation'));
         return;
       }
-      res.status(INTERNAL_SERVER_ERROR).send({ message: 'Error has occurred on the server' });
+      next(err);
     });
 };
 
-module.exports.updateUserInfo = (req, res) => {
+module.exports.updateUserInfo = (req, res, next) => {
   const { _id: userId } = req.user;
   const { name, about } = req.body;
 
   User.findByIdAndUpdate(userId, { name, about }, { new: true, runValidators: true })
     .then((user) => {
       if (!user) {
-        res.status(BAD_REQUEST_ERROR).send({ message: 'User with specified id not found' });
+        next(new BadRequestError('User with specified id not found'));
         return;
       }
-      res.send({ data: user });
+      res.send(user);
     })
     .catch((err) => {
       if (err.name === 'CastError' || err.name === 'ValidationError') {
-        res.status(BAD_REQUEST_ERROR).send({ message: 'Incorrect data transmitted when updating user information' });
+        next(new BadRequestError('Incorrect data transmitted when updating user information'));
         return;
       }
-      res.status(INTERNAL_SERVER_ERROR).send({ message: 'Error has occurred on the server' });
+      next(err);
     });
 };
 
-module.exports.updateAvatar = (req, res) => {
+module.exports.updateAvatar = (req, res, next) => {
   const { _id: userId } = req.user;
   const { avatar } = req.body;
 
   User.findByIdAndUpdate(userId, { avatar }, { new: true, runValidators: true })
     .then((user) => {
       if (!user) {
-        res.status(NOT_FOUND_ERROR).send({ message: 'User with specified id not found' });
+        next(new NotFoundError('User with specified id not found'));
         return;
       }
-      res.send({ data: user });
+      res.send(user);
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(BAD_REQUEST_ERROR).send({ message: 'Incorrect data is transmitted when the avatar is updated' });
+        next(new BadRequestError('Incorrect data is transmitted when the avatar is updated'));
         return;
       }
-      res.status(INTERNAL_SERVER_ERROR).send({ message: 'Error has occurred on the server' });
+      next(err);
     });
 };
 
-module.exports.login = (req, res) => {
+module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
   const { NODE_ENV, JWT_SECRET } = process.env;
 
@@ -121,6 +119,23 @@ module.exports.login = (req, res) => {
       }).end();
     })
     .catch((err) => {
-      res.status(401).send({ message: err.message }); // change
+      next(err);
+      // next(new UnauthorizedError('User is not authorized'));
+    });
+};
+
+module.exports.getCurrentUser = (req, res, next) => {
+  const { _id: userId } = req.user;
+  User.findById(userId)
+    .orFail(new Error('NotFoundError'))
+    .then((user) => {
+      if (!user) {
+        next(new UnauthorizedError('User is not authorized'));
+        return;
+      }
+      res.send(user);
+    })
+    .catch((err) => {
+      next(err);
     });
 };

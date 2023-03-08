@@ -1,13 +1,15 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const { errors } = require('celebrate');
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
 
 const { login, createUser } = require('./controllers/users');
+const auth = require('./middlewares/auth');
 const usersRouter = require('./routes/users');
 const cardsRouter = require('./routes/cards');
-
+const NotFoundError = require('./errors/NotFoundError'); // 404
 const { NOT_FOUND_ERROR } = require('./errors/errors');
 
 // mongodb://127.0.0.1:27017/mestodb
@@ -28,21 +30,20 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(limiter);
 app.use(helmet());
 app.disable('x-powered-by');
-app.use((req, res, next) => {
-  req.user = {
-    _id: '63fe6b6902d75098440c83fd',
-  };
-  next();
-});
 
 app.post('/signin', login);
 app.post('/signup', createUser);
 
-app.use('/users', usersRouter);
-app.use('/cards', cardsRouter);
+app.use('/users', auth, usersRouter);
+app.use('/cards', auth, cardsRouter);
 
-app.use((req, res) => {
-  res.status(NOT_FOUND_ERROR).send({ message: 'Page not exist' });
+app.use((req, res, next) => {
+  next(new NotFoundError());
 });
+app.use(errors());
+app.use('*', (req, res) => {
+  res.status(NOT_FOUND_ERROR).send({ message: 'The page or resource you\'re looking for can\'t be found' });
+});
+// 'Error has occurred on the server'
 
 app.listen(PORT);

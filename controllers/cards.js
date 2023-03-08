@@ -1,18 +1,16 @@
 const Card = require('../models/card');
-const {
-  BAD_REQUEST_ERROR, // 400
-  NOT_FOUND_ERROR, // 404
-  INTERNAL_SERVER_ERROR, // 500
-} = require('../errors/errors');
+const BadRequestError = require('../errors/BadRequestError'); // 400
+const ForbiddenError = require('../errors/ForbiddenError'); // 403
+const NotFoundError = require('../errors/NotFoundError'); // 404
 
-module.exports.getAllCards = (req, res) => {
+module.exports.getAllCards = (req, res, next) => {
   Card.find({})
     .populate('owner')
     .then((cards) => res.send(cards))
-    .catch(() => res.status(INTERNAL_SERVER_ERROR).send({ message: 'Error has occurred on the server' }));
+    .catch((err) => next(err));
 };
 
-module.exports.createCard = (req, res) => {
+module.exports.createCard = (req, res, next) => {
   const owner = req.user._id;
   const { name, link } = req.body;
 
@@ -20,71 +18,80 @@ module.exports.createCard = (req, res) => {
     .then((card) => res.send({ data: card }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(BAD_REQUEST_ERROR).send({ message: 'Incorrect data transmitted during card creation' });
+        next(new BadRequestError('Incorrect data transmitted during card creation'));
         return;
       }
-      res.status(INTERNAL_SERVER_ERROR).send({ message: 'Error has occurred on the server' });
+      next(err);
     });
 };
 
-module.exports.deleteCard = (req, res) => {
+module.exports.deleteCard = (req, res, next) => {
   const { cardId } = req.params;
+  const { _id: userId } = req.user;
 
-  Card.findByIdAndRemove(cardId)
+  Card.findById(cardId)
     .then((card) => {
       if (!card) {
-        res.status(NOT_FOUND_ERROR).send({ message: 'Card with specified id not found' });
+        next(new NotFoundError('Card with specified id not found'));
         return;
       }
-      res.send(card);
+      if (userId !== card.owner._id.toString()) {
+        next(new ForbiddenError('You can\'t delete this card'));
+        return;
+      }
+      Card.findByIdAndRemove(cardId)
+        .then(() => {
+          res.send(card);
+        })
+        .catch((err) => next(err));
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(BAD_REQUEST_ERROR).send({ message: 'Incorrect data transmitted during card deletion' });
+        next(new BadRequestError('Incorrect data transmitted during card deletion'));
         return;
       }
-      res.status(INTERNAL_SERVER_ERROR).send({ message: 'Error has occurred on the server' });
+      next(err);
     });
 };
 
-module.exports.likeCard = (req, res) => {
+module.exports.likeCard = (req, res, next) => {
   const { _id: userId } = req.user;
   const { cardId } = req.params;
 
   Card.findByIdAndUpdate(cardId, { $addToSet: { likes: userId } }, { new: true })
     .then((card) => {
       if (!card) {
-        res.status(NOT_FOUND_ERROR).send({ message: 'Card with specified id not found' });
+        next(new NotFoundError('Card with specified id not found'));
         return;
       }
       res.send(card);
     })
     .catch((err) => {
       if (err.name === 'ValidationError' || err.name === 'CastError') {
-        res.status(BAD_REQUEST_ERROR).send({ message: 'Incorrect data transmitted in order to like the card' });
+        next(new BadRequestError('Incorrect data transmitted in order to like the card'));
         return;
       }
-      res.status(INTERNAL_SERVER_ERROR).send({ message: 'Error has occurred on the server' });
+      next(err);
     });
 };
 
-module.exports.dislikeCard = (req, res) => {
+module.exports.dislikeCard = (req, res, next) => {
   const { _id: userId } = req.user;
   const { cardId } = req.params;
 
   Card.findByIdAndUpdate(cardId, { $pull: { likes: userId } }, { new: true })
     .then((card) => {
       if (!card) {
-        res.status(NOT_FOUND_ERROR).send({ message: 'Card with specified id not found' });
+        next(new NotFoundError('Card with specified id not found'));
         return;
       }
       res.send(card);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(BAD_REQUEST_ERROR).send({ message: 'Incorrect data transmitted in order to dislike the card' });
+        next(new BadRequestError('Incorrect data transmitted in order to dislike the card'));
         return;
       }
-      res.status(INTERNAL_SERVER_ERROR).send({ message: 'Error has occurred on the server' });
+      next(err);
     });
 };
