@@ -2,13 +2,9 @@ require('dotenv').config();
 const jwt = require('jsonwebtoken');
 const UnauthorizedError = require('../errors/UnauthorizedError');
 
-function handleAuthError(res, next) {
-  return next(new UnauthorizedError('Authorisation required'));
-}
+const handleAuthError = (res, next) => next(new UnauthorizedError('Authorisation required'));
 
-function extractBearerToken(header) {
-  return header.replace('Bearer ', '');
-}
+const extractBearerToken = (header) => header.replace('Bearer ', '');
 
 module.exports = (req, res, next) => {
   const { authorization } = req.headers;
