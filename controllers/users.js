@@ -6,6 +6,7 @@ const User = require('../models/user');
 const BadRequestError = require('../errors/BadRequestError'); // 400
 const UnauthorizedError = require('../errors/UnauthorizedError'); // 401
 const NotFoundError = require('../errors/NotFoundError'); // 404
+const ConflictError = require('../errors/ConflictError'); // 409
 
 module.exports.getAllUsers = (req, res, next) => {
   User.find({})
@@ -32,7 +33,7 @@ module.exports.getUserById = (req, res, next) => {
     });
 };
 
-module.exports.createUser = (req, res, next) => {
+module.exports.createUser = async (req, res, next) => {
   const {
     name,
     about,
@@ -41,7 +42,14 @@ module.exports.createUser = (req, res, next) => {
     password,
   } = req.body;
 
-  bcrypt.hash(password, 10)
+  User.findOne({ email })
+    .then((user) => {
+      if (user) {
+        next(new ConflictError('User with this email is already registered'));
+        return;
+      }
+      return bcrypt.hash(password, 10);
+    })
     .then((hash) => {
       User.create({
         name,
