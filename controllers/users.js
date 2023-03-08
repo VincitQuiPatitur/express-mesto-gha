@@ -48,7 +48,7 @@ module.exports.createUser = async (req, res, next) => {
         next(new ConflictError('User with this email is already registered'));
         return;
       }
-      return bcrypt.hash(password, 10);
+      bcrypt.hash(password, 10);
     })
     .then((hash) => {
       User.create({
@@ -59,7 +59,13 @@ module.exports.createUser = async (req, res, next) => {
         password: hash,
       });
     })
-    .then((user) => res.send(user))
+    .then((user) => res.send({
+      name: user.name,
+      about: user.about,
+      avatar: user.avatar,
+      email: user.email,
+      _id: user._id,
+    }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         next(new BadRequestError('Incorrect data transmitted during user creation'));
@@ -79,7 +85,7 @@ module.exports.updateUserInfo = (req, res, next) => {
         next(new BadRequestError('User with specified id not found'));
         return;
       }
-      res.send(user);
+      res.send({ data: user });
     })
     .catch((err) => {
       if (err.name === 'CastError' || err.name === 'ValidationError') {
@@ -100,7 +106,7 @@ module.exports.updateAvatar = (req, res, next) => {
         next(new NotFoundError('User with specified id not found'));
         return;
       }
-      res.send(user);
+      res.send({ data: user });
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
