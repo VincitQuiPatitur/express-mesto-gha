@@ -1,4 +1,4 @@
-require('dotenv').config();
+// require('dotenv').config();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
@@ -33,6 +33,40 @@ module.exports.getUserById = (req, res, next) => {
     });
 };
 
+/* module.exports.createUser = (req, res, next) => {
+  const {
+    name, about, avatar, email, password,
+  } = req.body;
+  User.findOne({email})
+    .then((user) => {
+      if (user) {
+        throw new DuplicateError('Пользователь с такой почтой уже зарегестрирован');
+      }
+      return bcrypt.hash(password, 10);
+    })
+    .then((hash) => User.create({
+      name,
+      about,
+      avatar,
+      email,
+      password: hash,
+    }))
+    .then((user) => res.send({
+      name: user.name,
+      about: user.about,
+      avatar: user.avatar,
+      _id: user._id,
+      email: user.email,
+    }))
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        throw new BadRequestError('Переданы некорректные данные при создании пользователя');
+      } else {
+        next(err);
+      }
+    });
+}; */
+
 module.exports.createUser = (req, res, next) => {
   const {
     name,
@@ -46,29 +80,27 @@ module.exports.createUser = (req, res, next) => {
     .then((user) => {
       if (user) {
         next(new ConflictError('User with this email is already registered'));
-        return;
       }
-      bcrypt.hash(password, 10);
+      return bcrypt.hash(password, 10);
     })
-    .then((hash) => {
-      User.create({
-        name,
-        about,
-        avatar,
-        email,
-        password: hash,
-      });
-    })
-    .then((user) => res.send({
+    .then((hash) => User.create({
       name,
       about,
       avatar,
       email,
+      password: hash,
+    }))
+    .then((user) => res.send({
+      name: user.name,
+      about: user.about,
+      avatar: user.avatar,
+      email: user.email,
       _id: user._id,
     }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        throw new BadRequestError('Incorrect data transmitted during user creation');
+        next(new BadRequestError('Incorrect data transmitted during user creation'));
+        return;
       }
       next(err);
     });
@@ -114,13 +146,13 @@ module.exports.updateAvatar = (req, res, next) => {
 
 module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
-  const { NODE_ENV, JWT_SECRET } = process.env;
+  // const { NODE_ENV, JWT_SECRET } = process.env;
 
   return User.findUserByCredentials(email, password)
     .then((user) => {
       const token = jwt.sign(
         { _id: user._id },
-        NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret',
+        '0559695638d8f557660622e028f1de34abe93dbf036a8c8f6d150b46382d5bec',
         { expiresIn: '7d' },
       );
       res.cookie('jwt', token, {

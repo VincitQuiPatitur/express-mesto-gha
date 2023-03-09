@@ -9,8 +9,8 @@ const { login, createUser } = require('./controllers/users');
 const auth = require('./middlewares/auth');
 const usersRouter = require('./routes/users');
 const cardsRouter = require('./routes/cards');
- const NotFoundError = require('./errors/NotFoundError'); // 404
-const { NOT_FOUND_ERROR, INTERNAL_SERVER_ERROR } = require('./errors/errors');
+const NotFoundError = require('./errors/NotFoundError'); // 404
+const { INTERNAL_SERVER_ERROR } = require('./errors/errors');
 const { validateLogin, validateUserCreation } = require('./middlewares/userValidation');
 
 // mongodb://127.0.0.1:27017/mestodb
