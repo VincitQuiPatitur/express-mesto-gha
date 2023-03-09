@@ -9,8 +9,8 @@ const { login, createUser } = require('./controllers/users');
 const auth = require('./middlewares/auth');
 const usersRouter = require('./routes/users');
 const cardsRouter = require('./routes/cards');
-const NotFoundError = require('./errors/NotFoundError'); // 404
-const { NOT_FOUND_ERROR } = require('./errors/errors');
+ const NotFoundError = require('./errors/NotFoundError'); // 404
+const { NOT_FOUND_ERROR, INTERNAL_SERVER_ERROR } = require('./errors/errors');
 const { validateLogin, validateUserCreation } = require('./middlewares/userValidation');
 
 // mongodb://127.0.0.1:27017/mestodb
@@ -38,13 +38,20 @@ app.post('/signin', validateLogin, login);
 app.use('/users', auth, usersRouter);
 app.use('/cards', auth, cardsRouter);
 
-app.use((req, res, next) => {
-  next(new NotFoundError());
-});
 app.use(errors());
-app.use('*', (req, res) => {
-  res.status(NOT_FOUND_ERROR).send({ message: 'The page or resource you\'re looking for can\'t be found' });
+
+app.use((req, res, next) => {
+  next(new NotFoundError('The page or resource you\'re looking for can\'t be found'));
+  // res.status(NOT_FOUND_ERROR).send({ message:  });
 });
-// 'Error has occurred on the server'
+
+app.use((err, req, res, next) => {
+  if (err.statusCode) {
+    res.status(err.statusCode).send({ message: err.message });
+  } else {
+    res.status(INTERNAL_SERVER_ERROR).send({ message: 'Error has occurred on the server' });
+  }
+  next();
+});
 
 app.listen(PORT);

@@ -33,7 +33,7 @@ module.exports.getUserById = (req, res, next) => {
     });
 };
 
-module.exports.createUser = async (req, res, next) => {
+module.exports.createUser = (req, res, next) => {
   const {
     name,
     about,
@@ -60,16 +60,15 @@ module.exports.createUser = async (req, res, next) => {
       });
     })
     .then((user) => res.send({
-      name: user.name,
-      about: user.about,
-      avatar: user.avatar,
-      email: user.email,
+      name,
+      about,
+      avatar,
+      email,
       _id: user._id,
     }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        next(new BadRequestError('Incorrect data transmitted during user creation'));
-        return;
+        throw new BadRequestError('Incorrect data transmitted during user creation');
       }
       next(err);
     });
@@ -82,15 +81,13 @@ module.exports.updateUserInfo = (req, res, next) => {
   User.findByIdAndUpdate(userId, { name, about }, { new: true, runValidators: true })
     .then((user) => {
       if (!user) {
-        next(new BadRequestError('User with specified id not found'));
-        return;
+        throw new BadRequestError('User with specified id not found');
       }
       res.send({ data: user });
     })
     .catch((err) => {
       if (err.name === 'CastError' || err.name === 'ValidationError') {
-        next(new BadRequestError('Incorrect data transmitted when updating user information'));
-        return;
+        throw new BadRequestError('Incorrect data transmitted when updating user information');
       }
       next(err);
     });
@@ -103,15 +100,13 @@ module.exports.updateAvatar = (req, res, next) => {
   User.findByIdAndUpdate(userId, { avatar }, { new: true, runValidators: true })
     .then((user) => {
       if (!user) {
-        next(new NotFoundError('User with specified id not found'));
-        return;
+        throw new NotFoundError('User with specified id not found');
       }
       res.send({ data: user });
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        next(new BadRequestError('Incorrect data is transmitted when the avatar is updated'));
-        return;
+        throw new BadRequestError('Incorrect data is transmitted when the avatar is updated');
       }
       next(err);
     });
@@ -144,8 +139,7 @@ module.exports.getCurrentUser = (req, res, next) => {
     .orFail(new Error('NotFoundError'))
     .then((user) => {
       if (!user) {
-        next(new UnauthorizedError('User is not authorized'));
-        return;
+        throw new UnauthorizedError('User is not authorized');
       }
       res.send(user);
     })

@@ -1,10 +1,10 @@
-const { statusCode } = require('./errors');
+const { CONFLICT_ERROR } = require('./errors');
 
 class ConflictError extends Error {
   constructor(message) {
     super(message);
-    this.statusCode = statusCode.CONFLICT_ERROR;
-    this.name = 'ConflictError';
+    this.statusCode = CONFLICT_ERROR;
+    // this.name = 'ConflictError';
   }
 }
 
