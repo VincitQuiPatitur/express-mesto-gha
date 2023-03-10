@@ -121,13 +121,13 @@ module.exports.login = (req, res, next) => {
         '0559695638d8f557660622e028f1de34abe93dbf036a8c8f6d150b46382d5bec',
         { expiresIn: '7d' },
       );
-      res.cookie('jwt', token, {
+      return res.send({ _id: token })
+      /*res.cookie('jwt', token, {
         httpOnly: true,
-      }).end();
+      }).end();*/
     })
-    .catch((err) => {
-      next(err);
-      // next(new UnauthorizedError('User is not authorized'));
+    .catch(() => {
+      next(new UnauthorizedError('User is not authorized'));
     });
 };
 
