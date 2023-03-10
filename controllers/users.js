@@ -22,7 +22,7 @@ module.exports.getUserById = (req, res, next) => {
         next(new NotFoundError('Invalid user id'));
         return;
       }
-      res.send(user);
+      res.send({ data: user });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
@@ -32,40 +32,6 @@ module.exports.getUserById = (req, res, next) => {
       next(err);
     });
 };
-
-/* module.exports.createUser = (req, res, next) => {
-  const {
-    name, about, avatar, email, password,
-  } = req.body;
-  User.findOne({email})
-    .then((user) => {
-      if (user) {
-        throw new DuplicateError('Пользователь с такой почтой уже зарегестрирован');
-      }
-      return bcrypt.hash(password, 10);
-    })
-    .then((hash) => User.create({
-      name,
-      about,
-      avatar,
-      email,
-      password: hash,
-    }))
-    .then((user) => res.send({
-      name: user.name,
-      about: user.about,
-      avatar: user.avatar,
-      _id: user._id,
-      email: user.email,
-    }))
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        throw new BadRequestError('Переданы некорректные данные при создании пользователя');
-      } else {
-        next(err);
-      }
-    });
-}; */
 
 module.exports.createUser = (req, res, next) => {
   const {
@@ -173,7 +139,7 @@ module.exports.getCurrentUser = (req, res, next) => {
       if (!user) {
         throw new UnauthorizedError('User is not authorized');
       }
-      res.send(user);
+      res.send({ data: user });
     })
     .catch((err) => {
       next(err);
