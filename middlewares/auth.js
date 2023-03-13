@@ -20,14 +20,9 @@ module.exports = (req, res, next) => {
   let payload;
   try {
     const token = authorization.replace('Bearer ', '');
-
-    console.log(`${token} im here`);
-    console.log(jwt.verify(token, JWT_SECRET));
     payload = jwt.verify(token, JWT_SECRET);
 
-    console.log('I did it');
   } catch (err) {
-    console.log('I didnt it');
     // handleAuthError(res);
     return res.status(401).send({ message: 'Authorisation required' });
   }
