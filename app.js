@@ -17,7 +17,7 @@ const { validateLogin, validateUserCreation } = require('./middlewares/userValid
 const { PORT = 3000, MONGO_URL = 'mongodb://localhost:27017/mestodb' } = process.env;
 
 mongoose.set('strictQuery', true);
-mongoose.connect(MONGO_URL); // не пугаться подчеркивания, это WebStorm, всё работает корректно
+mongoose.connect(MONGO_URL);
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -44,7 +44,6 @@ app.use(errors());
 
 app.use((req, res, next) => {
   next(new NotFoundError('The page or resource you\'re looking for can\'t be found'));
-  // res.status(NOT_FOUND_ERROR).send({ message:  });
 });
 
 app.use((err, req, res, next) => {
