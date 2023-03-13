@@ -5,7 +5,7 @@ const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
 const { errors } = require('celebrate');
 
-const { router } = require('express/lib/application');
+const router = require('./routes/index');
 const { errorHandler } = require('./middlewares/errorHandler');
 const NotFoundError = require('./errors/NotFoundError');
 // mongodb://127.0.0.1:27017/mestodb
