@@ -37,8 +37,8 @@ app.post('/signin', validateLogin, login);
 
 app.use(auth);
 
-app.use('/', usersRouter);
-app.use('/', cardsRouter);
+app.use('/users', usersRouter);
+app.use('/cards', cardsRouter);
 
 app.use(errors());
 
