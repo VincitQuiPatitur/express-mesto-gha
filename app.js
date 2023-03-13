@@ -1,18 +1,13 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
-const { errors } = require('celebrate');
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
+const { errors } = require('celebrate');
 
-const { login, createUser } = require('./controllers/users');
-const auth = require('./middlewares/auth');
-const usersRouter = require('./routes/users');
-const cardsRouter = require('./routes/cards');
-const NotFoundError = require('./errors/NotFoundError'); // 404
-const { INTERNAL_SERVER_ERROR } = require('./errors/errors');
-const { validateLogin, validateUserCreation } = require('./middlewares/userValidation');
-
+const { router } = require('express/lib/application');
+const { errorHandler } = require('./middlewares/errorHandler');
+const NotFoundError = require('./errors/NotFoundError');
 // mongodb://127.0.0.1:27017/mestodb
 const { PORT = 3000, MONGO_URL = 'mongodb://localhost:27017/mestodb' } = process.env;
 
@@ -32,27 +27,11 @@ app.use(limiter);
 app.use(helmet());
 app.disable('x-powered-by');
 
-app.post('/signup', validateUserCreation, createUser);
-app.post('/signin', validateLogin, login);
-
-app.use(auth);
-
-app.use('/users', usersRouter);
-app.use('/cards', cardsRouter);
-
-app.use(errors());
-
+app.use(router);
 app.use((req, res, next) => {
   next(new NotFoundError('The page or resource you\'re looking for can\'t be found'));
 });
-
-app.use((err, req, res, next) => {
-  if (err.statusCode) {
-    res.status(err.statusCode).send({ message: err.message });
-  } else {
-    res.status(INTERNAL_SERVER_ERROR).send({ message: 'Error has occurred on the server' });
-  }
-  next();
-});
+app.use(errors());
+app.use(errorHandler);
 
 app.listen(PORT);

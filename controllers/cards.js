@@ -7,7 +7,7 @@ module.exports.getAllCards = (req, res, next) => {
   Card.find({})
     .populate('owner')
     .then((cards) => res.send(cards))
-    .catch((err) => next(err));
+    .catch(next);
 };
 
 module.exports.createCard = (req, res, next) => {
@@ -43,7 +43,7 @@ module.exports.deleteCard = (req, res, next) => {
         .then(() => {
           res.send(card);
         })
-        .catch((err) => next(err));
+        .catch(next);
     })
     .catch((err) => {
       if (err.name === 'CastError') {

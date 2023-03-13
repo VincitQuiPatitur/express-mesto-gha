@@ -18,13 +18,7 @@ module.exports.createUser = (req, res, next) => {
     password,
   } = req.body;
 
-  User.findOne({ email })
-    .then((user) => {
-      if (user) {
-        next(new ConflictError('User with this email is already registered'));
-      }
-      return bcrypt.hash(password, 10);
-    })
+  bcrypt.hash(password, 10)
     .then((hash) => User.create({
       name,
       about,
@@ -40,6 +34,10 @@ module.exports.createUser = (req, res, next) => {
       _id: user._id,
     }))
     .catch((err) => {
+      if (err.code === 11000) {
+        next(new ConflictError('User with this email is already registered'));
+        return;
+      }
       if (err.name === 'ValidationError') {
         next(new BadRequestError('Incorrect data transmitted during user creation'));
         return;
@@ -70,7 +68,7 @@ module.exports.getUserById = (req, res, next) => {
 module.exports.getAllUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.send(users))
-    .catch((err) => next(err));
+    .catch(next);
 };
 
 module.exports.updateUserInfo = (req, res, next) => {
@@ -80,13 +78,15 @@ module.exports.updateUserInfo = (req, res, next) => {
   User.findByIdAndUpdate(userId, { name, about }, { new: true, runValidators: true })
     .then((user) => {
       if (!user) {
-        throw new BadRequestError('User with specified id not found');
+        next(new NotFoundError('User with specified id not found'));
+        return;
       }
       res.send({ data: user });
     })
     .catch((err) => {
       if (err.name === 'CastError' || err.name === 'ValidationError') {
-        throw new BadRequestError('Incorrect data transmitted when updating user information');
+        next(BadRequestError('Incorrect data transmitted when updating user information'));
+        return;
       }
       next(err);
     });
@@ -99,13 +99,15 @@ module.exports.updateAvatar = (req, res, next) => {
   User.findByIdAndUpdate(userId, { avatar }, { new: true, runValidators: true })
     .then((user) => {
       if (!user) {
-        throw new NotFoundError('User with specified id not found');
+        next(new NotFoundError('User with specified id not found'));
+        return;
       }
       res.send({ data: user });
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        throw new BadRequestError('Incorrect data is transmitted when the avatar is updated');
+        next(new BadRequestError('Incorrect data is transmitted when the avatar is updated'));
+        return;
       }
       next(err);
     });
@@ -135,10 +137,10 @@ module.exports.login = (req, res, next) => {
 module.exports.getCurrentUser = (req, res, next) => {
   const { _id: userId } = req.user;
   User.findById(userId)
-    .orFail(new Error('NotFoundError'))
     .then((user) => {
       if (!user) {
-        throw new UnauthorizedError('User is not authorized');
+        next(new UnauthorizedError('User is not authorized'));
+        return;
       }
       res.send({ data: user });
     })
