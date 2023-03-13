@@ -1,12 +1,14 @@
-require('dotenv').config();
+// require('dotenv').config();
 const jwt = require('jsonwebtoken');
 // const UnauthorizedError = require('../errors/UnauthorizedError');
 
 // const { JWT_SECRET } = process.env;
 
+const { JWT_SECRET } = require('../errors/errors');
+
 /* const handleAuthError = (res, next) => next(new UnauthorizedError('Authorisation required')); */
 
-const extractBearerToken = (header) => header.replace('Bearer ', '');
+// const extractBearerToken = (header) => header.replace('Bearer ', '');
 
 module.exports = (req, res, next) => {
   const { authorization } = req.headers;
@@ -15,13 +17,17 @@ module.exports = (req, res, next) => {
     // handleAuthError(res);
     return res.status(401).send({ message: 'Authorisation required' });
   }
-
-  const token = extractBearerToken(authorization);
   let payload;
-
   try {
-    payload = jwt.verify(token, JWT_SECRET);
+  const token = authorization.replace('Bearer ', '');
+
+  console.log(`${token} im here`);
+  console.log(jwt.verify(token, JWT_SECRET));
+  payload = jwt.verify(token, JWT_SECRET);
+
+    console.log('I did it');
   } catch (err) {
+    console.log('I didnt it');
     // handleAuthError(res);
     return res.status(401).send({ message: 'Authorisation required' });
   }

@@ -35,8 +35,10 @@ app.disable('x-powered-by');
 app.post('/signup', validateUserCreation, createUser);
 app.post('/signin', validateLogin, login);
 
-app.use('/users', auth, usersRouter);
-app.use('/cards', auth, cardsRouter);
+app.use(auth);
+
+app.use('/', usersRouter);
+app.use('/', cardsRouter);
 
 app.use(errors());
 

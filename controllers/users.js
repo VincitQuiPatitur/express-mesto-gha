@@ -1,37 +1,13 @@
 // require('dotenv').config();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { JWT_SECRET } = require('../errors/errors');
 
 const User = require('../models/user');
 const BadRequestError = require('../errors/BadRequestError'); // 400
 const UnauthorizedError = require('../errors/UnauthorizedError'); // 401
 const NotFoundError = require('../errors/NotFoundError'); // 404
 const ConflictError = require('../errors/ConflictError'); // 409
-
-module.exports.getAllUsers = (req, res, next) => {
-  User.find({})
-    .then((users) => res.send(users))
-    .catch((err) => next(err));
-};
-
-module.exports.getUserById = (req, res, next) => {
-  const { userId } = req.params;
-  User.findById(userId)
-    .then((user) => {
-      if (!user) {
-        next(new NotFoundError('Invalid user id'));
-        return;
-      }
-      res.send({ data: user });
-    })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        next(new BadRequestError('User with specified id not found'));
-        return;
-      }
-      next(err);
-    });
-};
 
 module.exports.createUser = (req, res, next) => {
   const {
@@ -70,6 +46,31 @@ module.exports.createUser = (req, res, next) => {
       }
       next(err);
     });
+};
+
+module.exports.getUserById = (req, res, next) => {
+  const { userId } = req.params;
+  User.findById(userId)
+    .then((user) => {
+      if (!user) {
+        next(new NotFoundError('Invalid user id'));
+        return;
+      }
+      res.send({ data: user });
+    })
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        next(new BadRequestError('User with specified id not found'));
+        return;
+      }
+      next(err);
+    });
+};
+
+module.exports.getAllUsers = (req, res, next) => {
+  User.find({})
+    .then((users) => res.send(users))
+    .catch((err) => next(err));
 };
 
 module.exports.updateUserInfo = (req, res, next) => {
@@ -118,13 +119,13 @@ module.exports.login = (req, res, next) => {
     .then((user) => {
       const token = jwt.sign(
         { _id: user._id },
-        '0559695638d8f557660622e028f1de34abe93dbf036a8c8f6d150b46382d5bec',
-        { expiresIn: '7d' },
+        JWT_SECRET,
+        { expiresIn: '7d' }
       );
-      return res.send({ _id: token })
-      /*res.cookie('jwt', token, {
+      return res.send({ _id: token });
+      /* res.cookie('jwt', token, {
         httpOnly: true,
-      }).end();*/
+      }).end(); */
     })
     .catch(() => {
       next(new UnauthorizedError('User is not authorized'));
