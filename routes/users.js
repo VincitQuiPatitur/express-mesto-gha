@@ -9,7 +9,9 @@ const {
 } = require('../controllers/users');
 
 const {
-  validateUserById, validateUserAvatarUpdates, validateUserInfoUpdates
+  validateUserInfoUpdates,
+  validateUserAvatarUpdates,
+  validateUserById,
 } = require('../middlewares/userValidation');
 
 router.get('/', getAllUsers);
