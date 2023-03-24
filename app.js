@@ -12,6 +12,7 @@ const NotFoundError = require('./errors/NotFoundError');
 // mongodb://127.0.0.1:27017/mestodb
 const { PORT = 3000, MONGO_URL = 'mongodb://localhost:27017/mestodb' } = process.env;
 const { requestLogger, errorLogger } = require('./middlewares/logger');
+const cors = require('./middlewares/cors');
 
 mongoose.set('strictQuery', true);
 mongoose.connect(MONGO_URL);
@@ -27,6 +28,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(limiter);
 app.use(helmet());
+app.use(cors);
 app.disable('x-powered-by');
 
 app.use(requestLogger);
