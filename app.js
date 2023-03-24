@@ -32,6 +32,11 @@ app.use(cors);
 app.disable('x-powered-by');
 
 app.use(requestLogger);
+app.get('/crash-test', () => {
+  setTimeout(() => {
+    throw new Error('Сервер сейчас упадёт');
+  }, 0);
+}); // удалить после ревью
 app.use(router);
 app.use(errorLogger);
 app.use((req, res, next) => {
