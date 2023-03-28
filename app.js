@@ -8,7 +8,6 @@ const { errors } = require('celebrate');
 
 const router = require('./routes/index');
 const { errorHandler } = require('./middlewares/errorHandler');
-const NotFoundError = require('./errors/NotFoundError');
 
 const { PORT = 3000, MONGO_URL = 'mongodb://127.0.0.1:27017/mestodb' } = process.env;
 const { requestLogger, errorLogger } = require('./middlewares/logger');
@@ -37,11 +36,9 @@ app.get('/crash-test', () => {
     throw new Error('Сервер сейчас упадёт');
   }, 0);
 }); // удалить после ревью
+
 app.use(router);
 app.use(errorLogger);
-app.use((req, res, next) => {
-  next(new NotFoundError('The page or resource you\'re looking for can\'t be found'));
-});
 app.use(errors());
 app.use(errorHandler);
 
