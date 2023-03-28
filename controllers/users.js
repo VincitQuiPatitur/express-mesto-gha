@@ -55,7 +55,7 @@ module.exports.getUserById = (req, res, next) => {
         next(new NotFoundError('Invalid user id'));
         return;
       }
-      res.send({ data: user });
+      res.send(user);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
@@ -82,7 +82,7 @@ module.exports.updateUserInfo = (req, res, next) => {
         next(new NotFoundError('User with specified id not found'));
         return;
       }
-      res.send({ data: user });
+      res.send(user);
     })
     .catch((err) => {
       if (err.name === 'CastError' || err.name === 'ValidationError') {
@@ -103,7 +103,7 @@ module.exports.updateAvatar = (req, res, next) => {
         next(new NotFoundError('User with specified id not found'));
         return;
       }
-      res.send({ data: user });
+      res.send(user);
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
@@ -142,7 +142,7 @@ module.exports.getCurrentUser = (req, res, next) => {
         next(new UnauthorizedError('User is not authorized'));
         return;
       }
-      res.send({ data: user });
+      res.send(user);
     })
     .catch((err) => {
       next(err);
