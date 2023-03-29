@@ -5,7 +5,6 @@ const NotFoundError = require('../errors/NotFoundError'); // 404
 
 module.exports.getAllCards = (req, res, next) => {
   Card.find({})
-    .populate('owner')
     .then((cards) => res.send(cards))
     .catch(next);
 };
@@ -35,7 +34,7 @@ module.exports.deleteCard = (req, res, next) => {
         next(new NotFoundError('Card with specified id not found'));
         return;
       }
-      if (userId !== card.owner._id.toString()) {
+      if (userId !== card.owner.toString()) {
         next(new ForbiddenError('You can\'t delete this card'));
         return;
       }

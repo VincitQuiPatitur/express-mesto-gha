@@ -129,8 +129,8 @@ module.exports.login = (req, res, next) => {
         httpOnly: true,
       }).end(); */
     })
-    .catch(() => {
-      next(new UnauthorizedError('User is not authorized'));
+    .catch((err) => {
+      next(err);
     });
 };
 
